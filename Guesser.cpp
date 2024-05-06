@@ -4,7 +4,7 @@
 using std::string;
 
 /*
-  Returns an whole number representing the distance between the guess,
+  Returns a whole number representing the distance between the guess,
   provided as an argument, and the secret. The distance represents the number
   of characters that would have to be changed at the same location to match
   the other string. When the two strings are identical, the distance is 0,
@@ -12,10 +12,30 @@ using std::string;
   strings are different lengths, each of the extra characters in the longer
   string also counts as an increase in 1 to the distance, up to the length of
   the secret; in other words, if m_secret has a 10 characters and the guess
-  has 100, the distance is 10.
+  has 100, the distance is 10. ***highest distance has to be truncated to length of the secret
 */
 unsigned int Guesser::distance(string guess){
-  return 0;
+   unsigned int count=0;
+   if(guess.size() <= m_secret.size()) {
+       for (int i = 0; i < guess.size(); i++) {
+           if (guess.at(i) != m_secret.at(i)) {
+               count++;
+           }
+       }
+       count += m_secret.size() - guess.size();
+   }
+   else if(guess.size() >= m_secret.size()) {
+       for (int i = 0; i < m_secret.size(); i++) {
+           if (guess.at(i) != m_secret.at(i)) {
+               count++;
+           }
+       }
+       count += guess.size() - m_secret.size();
+   }
+    if(count>m_secret.size()){
+        count = m_secret.size();
+    }
+  return count;
 }
 
 /*
@@ -25,7 +45,14 @@ unsigned int Guesser::distance(string guess){
   otherwise, it will be truncated at that length.
 */
 Guesser::Guesser(string secret){
-
+    if(secret.length() <= 32){
+        m_secret = secret;
+    }
+    else{
+        secret.resize(32);
+        m_secret = secret;
+    }
+    m_remaining = 3;
 }
 
 /*
@@ -40,7 +67,21 @@ Guesser::Guesser(string secret){
   and the secret.
 */
 bool Guesser::match(string guess){
-  return true;
+    if(distance(guess) > 2 || remaining() == 0){
+        m_remaining = 0;
+        return false;
+    }
+    else if(distance(guess) > 0 && distance(guess) <=2 && remaining() > 0){
+        m_remaining--;
+        return false;
+    }
+    else if(distance(guess) == 0 && remaining() > 0 && (m_secret.size() == guess.size())) {
+        m_remaining = 3;
+        return true;
+    }
+    else{
+        return false;
+    }
 }
 
 /*
@@ -51,6 +92,6 @@ bool Guesser::match(string guess){
   reset to three (3).
 */
 unsigned int Guesser::remaining(){
-  return 0;
+  return m_remaining;
 }
 
